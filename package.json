@@ -1,0 +1,35 @@
+{
+  "name": "drake-auth",
+  "version": "0.1.0",
+  "description": "Drake's standard auth kit: Clerk at the edge (email-code passwordless by default), app-owned sessions downstream. One identical plug-in for every app.",
+  "type": "module",
+  "exports": {
+    "./server": "./server/index.cjs",
+    "./browser": "./browser/index.js",
+    "./react": "./react/index.js"
+  },
+  "files": [
+    "server",
+    "browser",
+    "react",
+    "sql",
+    "docs",
+    "README.md"
+  ],
+  "dependencies": {
+    "@clerk/backend": "^1.24.0",
+    "connect-pg-simple": "^10.0.0",
+    "express-session": "^1.18.1"
+  },
+  "peerDependencies": {
+    "express": ">=4",
+    "pg": ">=8",
+    "react": ">=18"
+  },
+  "peerDependenciesMeta": {
+    "pg": { "optional": true },
+    "react": { "optional": true }
+  },
+  "license": "UNLICENSED",
+  "private": true
+}
