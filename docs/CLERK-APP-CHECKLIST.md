@@ -67,3 +67,21 @@ import { ClerkSignIn, clerkSignOut } from "drake-auth/react";
 ```
 
 Logout must call the app's `/api/auth/logout` AND `clerkSignOut()`.
+
+Next.js apps (the second door):
+
+```ts
+// middleware.ts
+import { createAdminClerkMiddleware } from "drake-auth/next";
+export default createAdminClerkMiddleware();
+export const config = { matcher: ["/admin/:path*", "/(api|trpc)(.*)"] };
+
+// anywhere server-side
+import { getAdminEmail, isAllowedEmail } from "drake-auth/next";
+```
+
+Env: `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`,
+`NEXT_PUBLIC_CLERK_SIGN_IN_URL=/admin/login` (and SIGN_UP_URL),
+`ADMIN_ALLOWED_EMAILS=a@x.com,b@y.com`. The sign-in page mounts
+`<SignIn/>` from `@clerk/nextjs` (see faesfiligree
+`src/app/admin/login/[[...rest]]/page.tsx` for the reference).

@@ -1,17 +1,19 @@
 {
   "name": "drake-auth",
-  "version": "0.1.1",
-  "description": "Drake's standard auth kit: Clerk at the edge (email-code passwordless by default), app-owned sessions downstream. One identical plug-in for every app.",
+  "version": "0.2.0",
+  "description": "Drake's standard auth kit: Clerk at the edge (email-code passwordless by default). One door for every app — Express, Next.js, or plain browser.",
   "type": "module",
   "exports": {
     "./server": "./server/index.cjs",
     "./browser": "./browser/index.js",
-    "./react": "./react/index.js"
+    "./react": "./react/index.js",
+    "./next": "./next/index.js"
   },
   "files": [
     "server",
     "browser",
     "react",
+    "next",
     "sql",
     "docs",
     "README.md"
@@ -22,11 +24,16 @@
     "express-session": "^1.18.1"
   },
   "peerDependencies": {
+    "@clerk/nextjs": ">=6",
     "express": ">=4",
+    "next": ">=14",
     "pg": ">=8",
     "react": ">=18"
   },
   "peerDependenciesMeta": {
+    "@clerk/nextjs": { "optional": true },
+    "express": { "optional": true },
+    "next": { "optional": true },
     "pg": { "optional": true },
     "react": { "optional": true }
   },

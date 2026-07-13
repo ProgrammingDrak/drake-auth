@@ -20,8 +20,17 @@ Extracted from the daily-command-center reference implementation.
 npm i github:ProgrammingDrak/drake-auth#v0.1.0
 ```
 
-Pin a tag. `./server` is CJS (works from CJS and ESM apps); `./browser` and
-`./react` are buildless ESM (Vite consumes them straight from node_modules).
+Pin a tag. `./server` is CJS (works from CJS and ESM apps); `./browser`,
+`./react`, and `./next` are buildless ESM.
+
+**Two doors, one standard:**
+- `drake-auth/server` + `drake-auth/browser|react` — Express apps. Clerk at
+  the front door only; the app mints its own pg-backed cookie session
+  (token-sync flow).
+- `drake-auth/next` — Next.js apps. Clerk's middleware IS the session
+  (`@clerk/nextjs` peer dep); exports `createAdminClerkMiddleware()` and the
+  email-allowlist helpers (`getAllowedEmails`, `isAllowedEmail`,
+  `getAdminEmail`). No app session, no users table required.
 
 ## Use
 
