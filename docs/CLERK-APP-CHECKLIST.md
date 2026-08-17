@@ -61,9 +61,27 @@ app.use(auth.router);         // BEFORE the app's requireAuth gate
 Browser (plain page or React):
 
 ```js
-import { initClerkAuth, clerkSignOut } from "drake-auth/browser";
+import { initClerkAuth, clerkSignOut, chromelessElements } from "drake-auth/browser";
 // or
-import { ClerkSignIn, clerkSignOut } from "drake-auth/react";
+import { ClerkSignIn, clerkSignOut, chromelessElements } from "drake-auth/react";
+```
+
+If the app keeps its own username/email and password login, use the standard
+single-card layout: Clerk social providers first, a plain `or` separator, and
+the credential form immediately below. Keep both methods visible. Pass
+`providerOnly: true` alongside `chromelessElements` so Clerk supplies only
+the social provider row at the initial step and does not duplicate the app's
+credential fields. Clerk continuation forms such as MFA and password reset
+remain visible. If Clerk is unavailable, preserve the credential form and hide
+only the empty provider region or show a compact provider-unavailable message.
+
+The host card owns the accessible context that Clerk no longer renders. Give
+the provider region an accessible label, keep a visible page heading, and
+announce loading, unavailable, and error states with an appropriate live
+region. A React consumer passes the same helper through the component:
+
+```jsx
+<ClerkSignIn providerOnly appearance={{ elements: chromelessElements }} />
 ```
 
 Logout must call the app's `/api/auth/logout` AND `clerkSignOut()`.
