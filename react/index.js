@@ -9,6 +9,7 @@ export { clerkSignOut, chromelessElements, initClerkAuth } from "../browser/inde
 
 export function ClerkSignIn({
   appearance,
+  providerOnly,
   onSignedIn,
   onUnavailable,
   onError,
@@ -27,6 +28,7 @@ export function ClerkSignIn({
     initClerkAuth({
       el: ref.current,
       appearance,
+      providerOnly,
       redirectUrl,
       configUrl,
       syncUrl,

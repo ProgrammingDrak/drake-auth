@@ -3,6 +3,7 @@ export interface InitClerkAuthOptions {
   configUrl?: string;
   syncUrl?: string;
   appearance?: Record<string, unknown>;
+  providerOnly?: boolean;
   redirectUrl?: string;
   onSignedIn?: (result: Record<string, unknown>) => void;
   onUnavailable?: (reason: "no-key" | "load-failed") => void;

@@ -54,21 +54,61 @@ async function fetchPublishableKey(configUrl) {
 // (no card-in-a-card). Spread into your own appearance and add `variables`
 // for the app palette.
 export const chromelessElements = {
-  rootBox: { width: "100%" },
-  cardBox: { boxShadow: "none", border: "none" },
+  rootBox: { width: "100%", maxWidth: "100%", minWidth: "0" },
+  cardBox: {
+    width: "100%",
+    maxWidth: "100%",
+    minWidth: "0",
+    boxShadow: "none",
+    border: "none",
+  },
   card: {
+    width: "100%",
+    maxWidth: "100%",
+    minWidth: "0",
     boxShadow: "none",
     border: "none",
     backgroundColor: "transparent",
     padding: "0",
   },
+  main: { width: "100%", maxWidth: "100%", minWidth: "0" },
+  form: { width: "100%", maxWidth: "100%", minWidth: "0" },
+  formFieldRow: { width: "100%", maxWidth: "100%", minWidth: "0" },
+  formFieldInput: { width: "100%", maxWidth: "100%", minWidth: "0" },
+  formButtonPrimary: { width: "100%", maxWidth: "100%", minWidth: "0" },
+  socialButtonsBlockButton: { width: "100%", maxWidth: "100%", minWidth: "0" },
 };
+
+const providerOnlyClass = "drake-auth-provider-only";
+const providerOnlyCss = `
+.${providerOnlyClass} .cl-signIn-start .cl-header,
+.${providerOnlyClass} .cl-signIn-start .cl-form,
+.${providerOnlyClass} .cl-signIn-start .cl-dividerRow,
+.${providerOnlyClass} .cl-signIn-start .cl-footer {
+  display: none !important;
+}`;
+
+// Clerk reuses its form element for MFA, password reset, and other OAuth
+// continuation challenges. Scope provider-only hiding to the initial SignIn
+// state so those security steps stay visible.
+function installProviderOnlyLayout(el) {
+  el.classList.add(providerOnlyClass);
+  const style = document.createElement("style");
+  style.setAttribute("data-drake-auth-provider-only", "");
+  style.textContent = providerOnlyCss;
+  document.head.appendChild(style);
+  return () => {
+    el.classList.remove(providerOnlyClass);
+    style.remove();
+  };
+}
 
 export async function initClerkAuth({
   el,
   configUrl = "/api/auth/config",
   syncUrl = "/api/auth/clerk-sync",
   appearance = undefined,
+  providerOnly = false,
   redirectUrl = typeof window !== "undefined" ? window.location.pathname : "/",
   onSignedIn = () => {},
   onUnavailable = () => {},
@@ -122,7 +162,9 @@ export async function initClerkAuth({
   }
 
   let mounted = false;
+  let removeProviderOnlyLayout = () => {};
   if (el) {
+    if (providerOnly) removeProviderOnlyLayout = installProviderOnlyLayout(el);
     clerk.mountSignIn(el, {
       appearance,
       forceRedirectUrl: redirectUrl,
@@ -139,6 +181,7 @@ export async function initClerkAuth({
     unmount: () => {
       unmounted = true;
       if (typeof removeListener === "function") removeListener();
+      removeProviderOnlyLayout();
       if (mounted && el) {
         try { clerk.unmountSignIn(el); } catch { /* already gone */ }
       }

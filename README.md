@@ -17,7 +17,7 @@ Extracted from the daily-command-center reference implementation.
 ## Install
 
 ```
-npm i github:ProgrammingDrak/drake-auth#v0.1.0
+npm i github:ProgrammingDrak/drake-auth#v0.2.1
 ```
 
 Pin a tag. `./server` is CJS (works from CJS and ESM apps); `./browser`,
@@ -43,5 +43,52 @@ per-app Clerk dashboard setup and the three integration points:
 3. `initClerkAuth` / `<ClerkSignIn/>` on the sign-in screen, and
    `clerkSignOut()` alongside the app's logout.
 
-First consumer: dnd-story-engine. DCC is the planned second (it keeps its
-Google OAuth — that's per-app Clerk config, not code).
+### One login surface
+
+Apps that keep an app-owned username/email and password path must render one
+login card in this order:
+
+1. Enabled Clerk social providers, such as Google
+2. A visible `or use your username or email` separator
+3. The app-owned credential form
+
+Do not hide the credential form behind a toggle and do not swap between a Clerk
+page and an app page. The fallback must remain visible when Clerk is available,
+loading, or temporarily unavailable. Set `providerOnly: true` to keep Clerk's
+provider buttons while the app owns the credential fields:
+
+```js
+import { initClerkAuth, chromelessElements } from "drake-auth/browser";
+
+await initClerkAuth({
+  el: document.getElementById("clerk-sign-in"),
+  appearance: {
+    variables: { colorPrimary: "#3b82f6" },
+    elements: chromelessElements,
+  },
+  providerOnly: true,
+  onUnavailable: (reason) => {
+    // Keep the credential form visible. Hide only the empty provider region
+    // for "no-key", or show a compact provider-unavailable message.
+  },
+});
+```
+
+Apps that use Clerk for every enabled sign-in method should continue using
+`chromelessElements` and should not render a second credential form.
+
+`providerOnly` removes Clerk's initial header, footer, and built-in credential
+form, but it deliberately restores Clerk's MFA, reset, and other continuation
+forms after a provider starts authentication. The host card must provide its
+own visible heading, an accessible label for the provider region, and announced
+loading, unavailable, and error states. Keep those messages next to the
+provider region without displacing or hiding the credential fallback.
+
+For shared Sign in/Register cards, change the field label, placeholder, and
+separator with the active mode. Sign in may say `Username or email` and `or use
+your username or email`; username-only registration should say `Username` and
+`or create with a username` so the UI never invites an email it will reject.
+
+Current consumers include dnd-story-engine and DCC. DCC keeps Google OAuth and
+its app-owned credential fallback; that provider choice remains per-app Clerk
+configuration rather than shared package code.

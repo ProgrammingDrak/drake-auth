@@ -10,6 +10,7 @@ export {
 
 export interface ClerkSignInProps {
   appearance?: Record<string, unknown>;
+  providerOnly?: boolean;
   onSignedIn?: (result: Record<string, unknown>) => void;
   onUnavailable?: (reason: "no-key" | "load-failed") => void;
   onError?: (error: Error) => void;
