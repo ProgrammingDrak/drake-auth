@@ -17,7 +17,7 @@ Extracted from the daily-command-center reference implementation.
 ## Install
 
 ```
-npm i github:ProgrammingDrak/drake-auth#v0.2.1
+npm i github:ProgrammingDrak/drake-auth#v0.2.2
 ```
 
 Pin a tag. `./server` is CJS (works from CJS and ESM apps); `./browser`,

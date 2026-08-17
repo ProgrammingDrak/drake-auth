@@ -79,26 +79,64 @@ export const chromelessElements = {
   socialButtonsBlockButton: { width: "100%", maxWidth: "100%", minWidth: "0" },
 };
 
-const providerOnlyClass = "drake-auth-provider-only";
-const providerOnlyCss = `
-.${providerOnlyClass} .cl-signIn-start .cl-header,
-.${providerOnlyClass} .cl-signIn-start .cl-form,
-.${providerOnlyClass} .cl-signIn-start .cl-dividerRow,
-.${providerOnlyClass} .cl-signIn-start .cl-footer {
+let providerOnlyMountId = 0;
+
+function escapeCssIdentifier(value) {
+  if (globalThis.CSS && typeof globalThis.CSS.escape === "function") return globalThis.CSS.escape(value);
+  const string = String(value);
+  const length = string.length;
+  const first = string.charCodeAt(0);
+  let result = "";
+  for (let index = 0; index < length; index += 1) {
+    const code = string.charCodeAt(index);
+    if (code === 0x0000) {
+      result += "\uFFFD";
+    } else if (
+      (code >= 0x0001 && code <= 0x001f) || code === 0x007f ||
+      (index === 0 && code >= 0x0030 && code <= 0x0039) ||
+      (index === 1 && code >= 0x0030 && code <= 0x0039 && first === 0x002d)
+    ) {
+      result += `\\${code.toString(16)} `;
+    } else if (index === 0 && code === 0x002d && length === 1) {
+      result += "\\-";
+    } else if (
+      code >= 0x0080 || code === 0x002d || code === 0x005f ||
+      (code >= 0x0030 && code <= 0x0039) ||
+      (code >= 0x0041 && code <= 0x005a) ||
+      (code >= 0x0061 && code <= 0x007a)
+    ) {
+      result += string.charAt(index);
+    } else {
+      result += `\\${string.charAt(index)}`;
+    }
+  }
+  return result;
+}
+
+function providerOnlyCss(id) {
+  const mount = `#${escapeCssIdentifier(id)}`;
+  return `
+${mount} .cl-signIn-start .cl-header,
+${mount} .cl-signIn-start .cl-form,
+${mount} .cl-signIn-start .cl-dividerRow,
+${mount} .cl-signIn-start .cl-footer {
   display: none !important;
 }`;
+}
 
 // Clerk reuses its form element for MFA, password reset, and other OAuth
 // continuation challenges. Scope provider-only hiding to the initial SignIn
 // state so those security steps stay visible.
 function installProviderOnlyLayout(el) {
-  el.classList.add(providerOnlyClass);
+  const assignedId = !el.id;
+  if (assignedId) el.id = `drake-auth-provider-only-${++providerOnlyMountId}`;
+  const mountId = el.id;
   const style = document.createElement("style");
   style.setAttribute("data-drake-auth-provider-only", "");
-  style.textContent = providerOnlyCss;
+  style.textContent = providerOnlyCss(mountId);
   document.head.appendChild(style);
   return () => {
-    el.classList.remove(providerOnlyClass);
+    if (assignedId && el.id === mountId) el.removeAttribute("id");
     style.remove();
   };
 }

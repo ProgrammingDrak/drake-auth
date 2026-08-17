@@ -1,6 +1,6 @@
 {
   "name": "drake-auth",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Drake's standard auth kit: Clerk at the edge (email-code passwordless by default). One door for every app — Express, Next.js, or plain browser.",
   "type": "module",
   "scripts": {
