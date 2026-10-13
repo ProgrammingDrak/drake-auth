@@ -1,0 +1,107 @@
+# Dependency license inventory
+
+Generated from the committed lockfile. These components keep their own licenses.
+This inventory does not replace package copyright notices or license texts.
+Review production bundles and native artifacts before distribution; preserve
+upstream notices and any LGPL/MPL/CC-BY source, attribution or relinking obligations.
+
+| Package | Version | License metadata |
+|---|---|---|
+| node_modules/@clerk/backend | 3.17.2 | MIT |
+| node_modules/@clerk/shared | 4.31.1 | MIT |
+| node_modules/@stablelib/base64 | 1.0.1 | MIT |
+| node_modules/@tanstack/query-core | 5.102.8 | MIT |
+| node_modules/accepts | 1.3.8 | MIT |
+| node_modules/array-flatten | 1.1.1 | MIT |
+| node_modules/body-parser | 1.20.8 | MIT |
+| node_modules/body-parser/node_modules/qs | 6.16.0 | BSD-3-Clause |
+| node_modules/bytes | 3.1.2 | MIT |
+| node_modules/call-bind-apply-helpers | 1.0.2 | MIT |
+| node_modules/call-bound | 1.0.4 | MIT |
+| node_modules/connect-pg-simple | 10.0.0 | MIT |
+| node_modules/content-disposition | 0.5.4 | MIT |
+| node_modules/content-type | 1.0.5 | MIT |
+| node_modules/cookie | 0.7.2 | MIT |
+| node_modules/cookie-signature | 1.0.7 | MIT |
+| node_modules/debug | 2.6.9 | MIT |
+| node_modules/depd | 2.0.0 | MIT |
+| node_modules/dequal | 2.0.3 | MIT |
+| node_modules/destroy | 1.2.0 | MIT |
+| node_modules/dunder-proto | 1.0.1 | MIT |
+| node_modules/ee-first | 1.1.1 | MIT |
+| node_modules/encodeurl | 2.0.0 | MIT |
+| node_modules/es-define-property | 1.0.1 | MIT |
+| node_modules/es-errors | 1.3.0 | MIT |
+| node_modules/es-object-atoms | 1.1.2 | MIT |
+| node_modules/escape-html | 1.0.3 | MIT |
+| node_modules/etag | 1.8.1 | MIT |
+| node_modules/express | 4.22.2 | MIT |
+| node_modules/express-session | 1.19.0 | MIT |
+| node_modules/fast-sha256 | 1.3.0 | Unlicense |
+| node_modules/finalhandler | 1.3.2 | MIT |
+| node_modules/forwarded | 0.2.0 | MIT |
+| node_modules/fresh | 0.5.2 | MIT |
+| node_modules/function-bind | 1.1.2 | MIT |
+| node_modules/get-intrinsic | 1.3.0 | MIT |
+| node_modules/get-proto | 1.0.1 | MIT |
+| node_modules/glob-to-regexp | 0.4.1 | BSD-2-Clause |
+| node_modules/gopd | 1.2.0 | MIT |
+| node_modules/has-symbols | 1.1.0 | MIT |
+| node_modules/hasown | 2.0.4 | MIT |
+| node_modules/http-errors | 2.0.1 | MIT |
+| node_modules/iconv-lite | 0.4.24 | MIT |
+| node_modules/inherits | 2.0.4 | ISC |
+| node_modules/ipaddr.js | 1.9.1 | MIT |
+| node_modules/js-cookie | 3.0.8 | MIT |
+| node_modules/math-intrinsics | 1.1.0 | MIT |
+| node_modules/media-typer | 0.3.0 | MIT |
+| node_modules/merge-descriptors | 1.0.3 | MIT |
+| node_modules/methods | 1.1.2 | MIT |
+| node_modules/mime | 1.6.0 | MIT |
+| node_modules/mime-db | 1.52.0 | MIT |
+| node_modules/mime-types | 2.1.35 | MIT |
+| node_modules/ms | 2.0.0 | MIT |
+| node_modules/negotiator | 0.6.3 | MIT |
+| node_modules/object-inspect | 1.13.4 | MIT |
+| node_modules/on-finished | 2.4.1 | MIT |
+| node_modules/on-headers | 1.1.0 | MIT |
+| node_modules/parseurl | 1.3.3 | MIT |
+| node_modules/path-to-regexp | 0.1.13 | MIT |
+| node_modules/pg | 8.23.0 | MIT |
+| node_modules/pg-cloudflare | 1.4.0 | MIT |
+| node_modules/pg-connection-string | 2.14.0 | MIT |
+| node_modules/pg-int8 | 1.0.1 | ISC |
+| node_modules/pg-pool | 3.14.0 | MIT |
+| node_modules/pg-protocol | 1.16.0 | MIT |
+| node_modules/pg-types | 2.2.0 | MIT |
+| node_modules/pgpass | 1.0.5 | MIT |
+| node_modules/postgres-array | 2.0.0 | MIT |
+| node_modules/postgres-bytea | 1.0.1 | MIT |
+| node_modules/postgres-date | 1.0.7 | MIT |
+| node_modules/postgres-interval | 1.2.0 | MIT |
+| node_modules/proxy-addr | 2.0.7 | MIT |
+| node_modules/qs | 6.15.3 | BSD-3-Clause |
+| node_modules/random-bytes | 1.0.0 | MIT |
+| node_modules/range-parser | 1.2.1 | MIT |
+| node_modules/raw-body | 2.5.3 | MIT |
+| node_modules/safe-buffer | 5.2.1 | MIT |
+| node_modules/safer-buffer | 2.1.2 | MIT |
+| node_modules/send | 0.19.2 | MIT |
+| node_modules/send/node_modules/ms | 2.1.3 | MIT |
+| node_modules/serve-static | 1.16.3 | MIT |
+| node_modules/setprototypeof | 1.2.0 | ISC |
+| node_modules/side-channel | 1.1.1 | MIT |
+| node_modules/side-channel-list | 1.0.1 | MIT |
+| node_modules/side-channel-map | 1.0.1 | MIT |
+| node_modules/side-channel-weakmap | 1.0.2 | MIT |
+| node_modules/split2 | 4.2.0 | ISC |
+| node_modules/standardwebhooks | 1.1.1 | MIT |
+| node_modules/statuses | 2.0.2 | MIT |
+| node_modules/toidentifier | 1.0.1 | MIT |
+| node_modules/tslib | 2.8.1 | 0BSD |
+| node_modules/type-is | 1.6.18 | MIT |
+| node_modules/uid-safe | 2.1.5 | MIT |
+| node_modules/unpipe | 1.0.0 | MIT |
+| node_modules/utils-merge | 1.0.1 | MIT |
+| node_modules/vary | 1.1.2 | MIT |
+| node_modules/xtend | 4.0.2 | MIT |

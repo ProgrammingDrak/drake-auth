@@ -17,10 +17,14 @@ Extracted from the daily-command-center reference implementation.
 ## Install
 
 ```
-npm i github:ProgrammingDrak/drake-auth#v0.2.2
+npm i github:ProgrammingDrak/drake-auth#<published-licensed-tag>
 ```
 
-Pin a tag. `./server` is CJS (works from CJS and ESM apps); `./browser`,
+Version 0.3.1 is prepared locally; no licensed main-line tag has been published
+yet. Install only after publishing and verifying the intended licensed commit.
+For DCC, the separate 0.1.2 maintenance artifact preserves the older API.
+
+Pin a published tag. `./server` is CJS (works from CJS and ESM apps); `./browser`,
 `./react`, and `./next` are buildless ESM.
 
 **Two doors, one standard:**
@@ -92,3 +96,12 @@ your username or email`; username-only registration should say `Username` and
 Current consumers include dnd-story-engine and DCC. DCC keeps Google OAuth and
 its app-owned credential fallback; that provider choice remains per-app Clerk
 configuration rather than shared package code.
+
+
+## License
+
+Copyright (C) 2026 Drake Shadwell. The Drake-owned software in this
+revision is licensed under **GNU AGPL version 3 only**
+(`AGPL-3.0-only`); see [LICENSE](LICENSE) and [COPYRIGHT](COPYRIGHT).
+It comes without warranty. Third-party components retain their own licenses.
+See [LICENSE-SOURCES.md](LICENSE-SOURCES.md) for source delivery and build material.
