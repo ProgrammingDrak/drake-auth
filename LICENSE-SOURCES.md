@@ -8,12 +8,13 @@ incorporating or linking covered code needs a separate compatibility review.
 
 ## Reproduce the software
 
-Use the Node engine requirement in package.json where present, the committed
-lockfile, scripts, schemas/migrations, .env.example, and README.md.
+This maintenance revision is a buildless library with no test script or
+committed lockfile. Use package.json, sql/session-table.sql and README.md.
+DCC pins its installed dependency versions with its own lockfile.
 
 ```sh
-npm ci
-npm test
+npm install --ignore-scripts
+npm pack --ignore-scripts
 # Buildless library: see README.md and sql/session-table.sql.
 ```
 
