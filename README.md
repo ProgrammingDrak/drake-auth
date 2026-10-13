@@ -36,3 +36,12 @@ per-app Clerk dashboard setup and the three integration points:
 
 First consumer: dnd-story-engine. DCC is the planned second (it keeps its
 Google OAuth — that's per-app Clerk config, not code).
+
+
+## License-only maintenance release
+
+Version 0.1.2 prepares AGPL-3.0-only licensing for the 0.1.1 code used by DCC.
+Runtime source is unchanged. No previous tag is rewritten. This new version
+is prepared locally and is not yet a published GitHub tag or package release.
+
+Copyright (C) 2026 Drake Shadwell. See LICENSE, COPYRIGHT and LICENSE-SOURCES.md.
