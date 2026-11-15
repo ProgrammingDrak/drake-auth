@@ -4,8 +4,8 @@
 //   fetch {configUrl} -> null key => onUnavailable("no-key")
 //   decode the Frontend API host from the publishable key
 //     (pk_test_<base64("<fapi-host>$")>)
-//   inject https://<fapi>/npm/@clerk/clerk-js@5/dist/clerk.browser.js
-//   clerk.load(); already signed in => sync immediately, else mountSignIn
+//   load ClerkJS 6 and the Clerk UI bundle from the instance frontend API
+//   already signed in => sync immediately, else mountSignIn
 //   sync = POST {syncUrl} with Authorization: Bearer <clerk session token>,
 //   which mints the app's own cookie session; then onSignedIn(result).
 
@@ -19,24 +19,40 @@ function decodeFapiHost(pk) {
   }
 }
 
+function loadScript(url, publishableKey) {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = url;
+    script.async = true;
+    script.crossOrigin = "anonymous";
+    if (publishableKey) script.setAttribute("data-clerk-publishable-key", publishableKey);
+    script.onload = resolve;
+    script.onerror = () => {
+      script.remove();
+      reject(new Error("Failed to load a Clerk browser bundle"));
+    };
+    document.head.appendChild(script);
+  });
+}
+
 async function loadClerkJs(publishableKey) {
-  if (window.Clerk) return window.Clerk;
   if (!clerkLoadPromise) {
-    const fapiHost = decodeFapiHost(publishableKey);
-    if (!fapiHost) throw new Error("Could not decode Clerk frontend API host");
-    clerkLoadPromise = new Promise((resolve, reject) => {
-      const s = document.createElement("script");
-      s.src = "https://" + fapiHost + "/npm/@clerk/clerk-js@5/dist/clerk.browser.js";
-      s.async = true;
-      s.crossOrigin = "anonymous";
-      s.setAttribute("data-clerk-publishable-key", publishableKey);
-      s.onload = () => resolve(window.Clerk);
-      s.onerror = () => {
-        clerkLoadPromise = null;
-        reject(new Error("Failed to load Clerk"));
-      };
-      document.head.appendChild(s);
-    });
+    clerkLoadPromise = (async () => {
+      if (!window.Clerk) {
+        const fapiHost = decodeFapiHost(publishableKey);
+        if (!fapiHost) throw new Error("Could not decode Clerk frontend API host");
+        const origin = "https://" + fapiHost;
+        if (!window.__internal_ClerkUICtor) {
+          await loadScript(origin + "/npm/@clerk/ui@1/dist/ui.browser.js");
+        }
+        await loadScript(origin + "/npm/@clerk/clerk-js@6/dist/clerk.browser.js", publishableKey);
+      }
+      const clerk = window.Clerk;
+      if (!clerk) throw new Error("Clerk browser SDK did not initialize");
+      const ClerkUI = window.__internal_ClerkUICtor;
+      await clerk.load(ClerkUI ? { ui: { ClerkUI } } : undefined);
+      return clerk;
+    })().finally(() => { clerkLoadPromise = null; });
   }
   return clerkLoadPromise;
 }
@@ -161,7 +177,6 @@ export async function initClerkAuth({
   let clerk;
   try {
     clerk = await loadClerkJs(pk);
-    await clerk.load();
   } catch (e) {
     onUnavailable("load-failed");
     onError(e);
@@ -237,7 +252,6 @@ export async function clerkSignOut({ configUrl = "/api/auth/config" } = {}) {
       const pk = await fetchPublishableKey(configUrl);
       if (!pk) return; // Clerk not configured — nothing to sign out of
       clerk = await loadClerkJs(pk);
-      await clerk.load();
     }
     if (clerk.user) await clerk.signOut();
   } catch {

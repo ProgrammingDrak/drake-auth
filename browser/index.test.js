@@ -11,6 +11,53 @@ test("chromeless widget elements stay constrained to their host card", () => {
   }
 });
 
+test("loads the supported ClerkJS and UI bundles before mounting sign-in", async (t) => {
+  const originalWindow = globalThis.window;
+  const originalDocument = globalThis.document;
+  const originalFetch = globalThis.fetch;
+  t.after(() => {
+    globalThis.window = originalWindow;
+    globalThis.document = originalDocument;
+    globalThis.fetch = originalFetch;
+  });
+
+  const ClerkUI = class {};
+  const el = {};
+  const host = "accounts.example.test";
+  const key = "pk_test_" + btoa(host + "$");
+  const scripts = [];
+  const clerk = {
+    load: async (options) => assert.deepEqual(options, { ui: { ClerkUI } }),
+    mountSignIn: (target) => assert.equal(target, el),
+    unmountSignIn: () => {},
+    addListener: () => () => {},
+  };
+  globalThis.window = { location: { pathname: "/login" } };
+  globalThis.fetch = async () => ({ json: async () => ({ clerkPublishableKey: key }) });
+  globalThis.document = {
+    createElement: () => ({
+      setAttribute(name, value) { this[name] = value; },
+    }),
+    head: {
+      appendChild(script) {
+        scripts.push(script);
+        if (scripts.length === 1) window.__internal_ClerkUICtor = ClerkUI;
+        if (scripts.length === 2) window.Clerk = clerk;
+        queueMicrotask(() => script.onload());
+      },
+    },
+  };
+
+  const controller = await initClerkAuth({ el });
+  assert.equal(controller.clerk, clerk);
+  assert.deepEqual(scripts.map((script) => script.src), [
+    "https://" + host + "/npm/@clerk/ui@1/dist/ui.browser.js",
+    "https://" + host + "/npm/@clerk/clerk-js@6/dist/clerk.browser.js",
+  ]);
+  assert.equal(scripts[1]["data-clerk-publishable-key"], key);
+  controller.unmount();
+});
+
 test("provider-only layout hides only the initial Clerk form", async () => {
   const originalWindow = globalThis.window;
   const originalDocument = globalThis.document;
