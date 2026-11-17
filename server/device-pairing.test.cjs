@@ -6,13 +6,13 @@ const session = require("express-session");
 const { createDevicePairing, createPgDevicePairingStore } = require("./device-pairing.cjs");
 
 const databaseUrl = process.env.AUTH_PAIRING_TEST_DATABASE_URL;
-async function fixture(t) {
+async function fixture(t, { max = 1, beforeRegenerate, onResolve } = {}) {
   const { Pool } = require("pg");
   assert(["localhost", "127.0.0.1"].includes(new URL(databaseUrl).hostname), "Test database must be localhost");
   const admin = new Pool({ connectionString: databaseUrl });
   const schema = "pairing_" + crypto.randomBytes(8).toString("hex");
   await admin.query('CREATE SCHEMA "' + schema + '"');
-  const pool = new Pool({ connectionString: databaseUrl, options: "-c search_path=" + schema, max: 1 });
+  const pool = new Pool({ connectionString: databaseUrl, options: "-c search_path=" + schema, max });
   await pool.query("CREATE TABLE sessions (sid VARCHAR PRIMARY KEY, sess JSON NOT NULL, expire TIMESTAMP NOT NULL)");
   const PgSession = require("connect-pg-simple")(session);
   const store = createPgDevicePairingStore(pool);
@@ -23,6 +23,13 @@ async function fixture(t) {
   app.use(express.json());
   app.use(session({ secret: "synthetic-local-session-secret-at-least-32-characters", resave: false, saveUninitialized: false,
     store: new PgSession({ pool, schemaName: schema, tableName: "sessions", pruneSessionInterval: false }) }));
+  if (beforeRegenerate) app.use((req, _res, next) => {
+    const regenerate = req.session.regenerate.bind(req.session);
+    req.session.regenerate = callback => {
+      beforeRegenerate().then(() => regenerate(callback), callback);
+    };
+    next();
+  });
   app.post("/test/login", (req, res) => {
     req.session.userId = req.body.userId;
     res.json({ ok: true });
@@ -31,7 +38,10 @@ async function fixture(t) {
   const adapters = {
     store, secret: "synthetic-pairing-secret-at-least-32-characters",
     getAccount: req => accounts.get(String(req.session.userId)),
-    resolveAccount: id => accounts.get(String(id)),
+    resolveAccount: async id => {
+      if (onResolve) await onResolve();
+      return accounts.get(String(id));
+    },
     onSession: (req, account) => {
       Object.assign(req.session, account);
       if (failSave) req.session.save = callback => callback(new Error("synthetic session save failure"));
@@ -169,4 +179,71 @@ test("PostgreSQL throttling is shared across stores and rolls back failed transa
   assert.equal((await pool.query("SELECT * FROM auth_device_pairing_limits WHERE key='rollback'")).rowCount,0);
   await pool.query("UPDATE auth_device_pairing_limits SET expires_at=NOW()-INTERVAL '1 second'");
   await other.limit("same",2,600);
+});
+
+test("multiple PostgreSQL connections cannot redeem one code twice",
+  { skip: !databaseUrl, timeout: 10000 }, async t => {
+  let releaseRegeneration, regenerationCount = 0;
+  const bothRegenerating = new Promise(resolve => { releaseRegeneration = resolve; });
+  let releaseResolution, markFirstResolution;
+  const resolutionGate = new Promise(resolve => { releaseResolution = resolve; });
+  const firstResolution = new Promise(resolve => { markFirstResolution = resolve; });
+  let resolutionCount = 0;
+  const { agent, pool, store } = await fixture(t, {
+    max: 4,
+    beforeRegenerate: async () => {
+      if (++regenerationCount === 2) releaseRegeneration();
+      await bothRegenerating;
+    },
+    onResolve: async () => {
+      if (++resolutionCount === 1) { markFirstResolution(); await resolutionGate; }
+    }
+  });
+  let markSecondSelect, secondSelectFinished = false, secondBackend;
+  const secondSelect = new Promise(resolve => { markSecondSelect = resolve; });
+  let selects = 0;
+  const transaction = store.transaction;
+  store.transaction = callback => transaction(client => callback({
+    query(sql, args) {
+      const result = client.query(sql,args);
+      if (sql.includes("SELECT *, expires_at<=NOW()")) {
+        if (++selects === 2) {
+          secondBackend = client.processID;
+          result.then(() => { secondSelectFinished = true; });
+          markSecondSelect();
+        }
+      }
+      return result;
+    }
+  }));
+
+  const glasses = agent(), phone = agent();
+  await phone.login(1);
+  const started = await glasses.post("start");
+  const inspected = await phone.post("inspect", {code:started.body.code});
+  await phone.post("approve", {challenge:inspected.body.challenge});
+  const cookie = glasses.cookie();
+  const responses = Promise.all([
+    glasses.post("redeem",{}, {cookie}),
+    agent().post("redeem",{}, {cookie})
+  ]);
+  await firstResolution;
+  await secondSelect;
+  try {
+    // Release the first holder once the second SELECT either returned or waits
+    // on its row lock. This avoids a timing-based contention assumption.
+    let overlapObserved = false;
+    for (let attempt = 0; attempt < 100; attempt++) {
+      const { rows } = await pool.query("SELECT wait_event_type FROM pg_stat_activity WHERE pid=$1", [secondBackend]);
+      if (secondSelectFinished || rows[0]?.wait_event_type === "Lock") {
+        overlapObserved = true;
+        break;
+      }
+      await new Promise(resolve => setTimeout(resolve,10));
+    }
+    assert(overlapObserved, "The second transaction must overlap the first");
+  } finally { releaseResolution(); }
+  const results = await responses;
+  assert.equal(results.filter(result=>result.status===200).length,1);
+  assert.equal(results.filter(result=>result.status===410).length,1);
 });
